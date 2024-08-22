@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { backend } from 'declarations/backend';
-import { Container, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, TextField, Button, Box, Grid, Chip, Divider } from '@mui/material';
-import { Delete, CheckCircle, Add } from '@mui/icons-material';
+import { Container, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, TextField, Button, Box, Grid, Chip, Divider, Paper, AppBar, Toolbar } from '@mui/material';
+import { Delete, CheckCircle, Add, ShoppingCart, LocalGroceryStore } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
+import { styled } from '@mui/system';
 
 type GroceryItem = {
   id: bigint;
@@ -12,6 +13,20 @@ type GroceryItem = {
   isPredefined: boolean;
   emoji: string;
 };
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(3),
+  marginBottom: theme.spacing(3),
+  borderRadius: '12px',
+  boxShadow: '0 3px 5px 2px rgba(0, 0, 0, .1)',
+}));
+
+const StyledChip = styled(Chip)(({ theme }) => ({
+  margin: theme.spacing(0.5),
+  '&:hover': {
+    backgroundColor: theme.palette.primary.light,
+  },
+}));
 
 function App() {
   const [items, setItems] = useState<GroceryItem[]>([]);
@@ -62,85 +77,102 @@ function App() {
   };
 
   return (
-    <Container maxWidth="md">
-      <Typography variant="h4" component="h1" gutterBottom>
-        Grocery List
-      </Typography>
-      {categories.map((category) => (
-        <Box key={category} sx={{ mb: 4 }}>
-          <Typography variant="h5" component="h2" gutterBottom>
-            {category}
+    <>
+      <AppBar position="static" color="primary" elevation={0}>
+        <Toolbar>
+          <LocalGroceryStore sx={{ mr: 2 }} />
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            Smart Grocery List
           </Typography>
-          <Grid container spacing={2} sx={{ mb: 2 }}>
-            {predefinedItems[category]?.map(([item, emoji]) => (
-              <Grid item key={item}>
-                <Chip
+        </Toolbar>
+      </AppBar>
+      <Container maxWidth="md" sx={{ mt: 4 }}>
+        <StyledPaper elevation={3}>
+          <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mb: 4 }}>
+            <Typography variant="h5" gutterBottom>Add Custom Item</Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <Controller
+                  name="name"
+                  control={control}
+                  defaultValue=""
+                  rules={{ required: true }}
+                  render={({ field }) => <TextField {...field} label="Item Name" fullWidth />}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Controller
+                  name="category"
+                  control={control}
+                  defaultValue={categories[0] || ''}
+                  rules={{ required: true }}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      select
+                      label="Category"
+                      fullWidth
+                      SelectProps={{
+                        native: true,
+                      }}
+                    >
+                      {categories.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </TextField>
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Button type="submit" variant="contained" color="primary" fullWidth startIcon={<Add />}>
+                  Add Item
+                </Button>
+              </Grid>
+            </Grid>
+          </Box>
+        </StyledPaper>
+
+        {categories.map((category) => (
+          <StyledPaper key={category} elevation={3}>
+            <Typography variant="h5" gutterBottom>{category}</Typography>
+            <Box sx={{ mb: 2 }}>
+              {predefinedItems[category]?.map(([item, emoji]) => (
+                <StyledChip
+                  key={item}
                   label={`${emoji} ${item}`}
                   onClick={() => handleAddPredefinedItem(item, emoji, category)}
                   icon={<Add />}
                 />
-              </Grid>
-            ))}
-          </Grid>
-          <Divider sx={{ my: 2 }} />
-        </Box>
-      ))}
-      <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ my: 2 }}>
-        <Controller
-          name="name"
-          control={control}
-          defaultValue=""
-          rules={{ required: true }}
-          render={({ field }) => <TextField {...field} label="Custom Item Name" fullWidth margin="normal" />}
-        />
-        <Controller
-          name="category"
-          control={control}
-          defaultValue={categories[0] || ''}
-          rules={{ required: true }}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              select
-              label="Category"
-              fullWidth
-              margin="normal"
-              SelectProps={{
-                native: true,
-              }}
-            >
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
               ))}
-            </TextField>
-          )}
-        />
-        <Button type="submit" variant="contained" color="primary" fullWidth startIcon={<Add />}>
-          Add Custom Item
-        </Button>
-      </Box>
-      <List>
-        {items.map((item) => (
-          <ListItem key={Number(item.id)} sx={{ bgcolor: item.completed ? 'rgba(76, 175, 80, 0.1)' : 'inherit' }}>
-            <ListItemText
-              primary={`${item.emoji} ${item.name}`}
-              secondary={item.category}
-              sx={{ textDecoration: item.completed ? 'line-through' : 'none' }}
-            />
-            <ListItemSecondaryAction>
-              <IconButton edge="end" aria-label="complete" onClick={() => handleComplete(item.id)} disabled={item.completed}>
-                <CheckCircle />
-              </IconButton>
-              <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(item.id)}>
-                <Delete />
-              </IconButton>
-            </ListItemSecondaryAction>
-          </ListItem>
+            </Box>
+            <List>
+              {items.filter(item => item.category === category).map((item) => (
+                <ListItem key={Number(item.id)} sx={{
+                  bgcolor: item.completed ? 'rgba(76, 175, 80, 0.1)' : 'inherit',
+                  borderRadius: '8px',
+                  mb: 1,
+                }}>
+                  <ListItemText
+                    primary={`${item.emoji} ${item.name}`}
+                    sx={{ textDecoration: item.completed ? 'line-through' : 'none' }}
+                  />
+                  <ListItemSecondaryAction>
+                    <IconButton edge="end" aria-label="complete" onClick={() => handleComplete(item.id)} disabled={item.completed}>
+                      <CheckCircle />
+                    </IconButton>
+                    <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(item.id)}>
+                      <Delete />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))}
+            </List>
+          </StyledPaper>
         ))}
-      </List>
-    </Container>
+      </Container>
+    </>
   );
 }
 
