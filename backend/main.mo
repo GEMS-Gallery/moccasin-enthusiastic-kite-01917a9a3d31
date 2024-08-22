@@ -32,7 +32,9 @@ actor {
     ("Apple", "🍎"), ("Banana", "🍌"), ("Bread", "🍞"), ("Milk", "🥛"), ("Eggs", "🥚"),
     ("Cheese", "🧀"), ("Chicken", "🍗"), ("Rice", "🍚"), ("Pasta", "🍝"), ("Tomato", "🍅"),
     ("Potato", "🥔"), ("Onion", "🧅"), ("Carrot", "🥕"), ("Lettuce", "🥬"), ("Cucumber", "🥒"),
-    ("Yogurt", "🥛"), ("Cereal", "🥣"), ("Coffee", "☕"), ("Tea", "🍵"), ("Juice", "🧃")
+    ("Yogurt", "🥛"), ("Cereal", "🥣"), ("Coffee", "☕"), ("Tea", "🍵"), ("Juice", "🧃"),
+    ("Fish", "🐟"), ("Beef", "🥩"), ("Pork", "🥓"), ("Garlic", "🧄"), ("Lemon", "🍋"),
+    ("Orange", "🍊"), ("Grapes", "🍇"), ("Strawberry", "🍓"), ("Watermelon", "🍉"), ("Pineapple", "🍍")
   ];
 
   // Predefined list of supplies with emojis
@@ -40,7 +42,9 @@ actor {
     ("Paper Towels", "🧻"), ("Dish Soap", "🧼"), ("Laundry Detergent", "🧺"),
     ("Trash Bags", "🗑️"), ("Aluminum Foil", "🔲"), ("Plastic Wrap", "🎁"),
     ("Toothpaste", "🦷"), ("Shampoo", "🧴"), ("Soap", "🧼"),
-    ("Toilet Paper", "🧻"), ("Tissues", "🤧"), ("Sponges", "🧽")
+    ("Toilet Paper", "🧻"), ("Tissues", "🤧"), ("Sponges", "🧽"),
+    ("Dishwasher Tablets", "🍽️"), ("Air Freshener", "🌸"), ("Bleach", "🧪"),
+    ("Glass Cleaner", "🪟"), ("Floor Cleaner", "🧹"), ("Insect Repellent", "🦟")
   ];
 
   // Predefined list of household items with emojis
@@ -48,7 +52,25 @@ actor {
     ("Light Bulbs", "💡"), ("Batteries", "🔋"), ("Candles", "🕯️"),
     ("Air Freshener", "🌸"), ("Cleaning Gloves", "🧤"), ("Broom", "🧹"),
     ("Mop", "🧼"), ("Dustpan", "🧹"), ("Garbage Bags", "🗑️"),
-    ("Dish Cloths", "🧽"), ("Scrub Brush", "🧽"), ("Plunger", "🪠")
+    ("Dish Cloths", "🧽"), ("Scrub Brush", "🧽"), ("Plunger", "🪠"),
+    ("Flashlight", "🔦"), ("Duct Tape", "📼"), ("Scissors", "✂️"),
+    ("Matches", "🔥"), ("Clothespins", "🧷"), ("Hangers", "🧥")
+  ];
+
+  // Predefined list of personal care items with emojis
+  let predefinedPersonalCare: [(Text, Text)] = [
+    ("Toothbrush", "🪥"), ("Deodorant", "💨"), ("Razor", "🪒"),
+    ("Lotion", "🧴"), ("Sunscreen", "🧴"), ("Lip Balm", "💄"),
+    ("Cotton Swabs", "🦻"), ("Nail Clippers", "✂️"), ("Hair Brush", "🧼"),
+    ("Hair Ties", "🎀"), ("Feminine Products", "🩸"), ("Cologne/Perfume", "🌺")
+  ];
+
+  // Predefined list of beverages with emojis
+  let predefinedBeverages: [(Text, Text)] = [
+    ("Water", "💧"), ("Soda", "🥤"), ("Beer", "🍺"),
+    ("Wine", "🍷"), ("Juice", "🧃"), ("Milk", "🥛"),
+    ("Tea", "🍵"), ("Coffee", "☕"), ("Energy Drink", "⚡"),
+    ("Sparkling Water", "🫧"), ("Lemonade", "🍋"), ("Iced Tea", "🧊🍵")
   ];
 
   // Get predefined items by category
@@ -57,13 +79,15 @@ actor {
       case ("Food") { predefinedFood };
       case ("Supplies") { predefinedSupplies };
       case ("Household") { predefinedHousehold };
+      case ("Personal Care") { predefinedPersonalCare };
+      case ("Beverages") { predefinedBeverages };
       case (_) { [] };
     }
   };
 
   // Get all categories
   public query func getCategories() : async [Text] {
-    ["Food", "Supplies", "Household"]
+    ["Food", "Supplies", "Household", "Personal Care", "Beverages"]
   };
 
   // Add a new grocery item (custom or predefined)
