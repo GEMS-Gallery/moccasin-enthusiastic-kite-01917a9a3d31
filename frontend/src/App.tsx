@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { backend } from 'declarations/backend';
-import { Container, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, TextField, Button, Box, Grid, Chip, Divider, Paper, AppBar, Toolbar } from '@mui/material';
-import { Delete, CheckCircle, Add, ShoppingCart, LocalGroceryStore } from '@mui/icons-material';
+import { Container, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, TextField, Button, Box, Grid, Chip, Divider, Paper, AppBar, Toolbar, Select, MenuItem, FormControl, InputLabel, CircularProgress } from '@mui/material';
+import { Delete, CheckCircle, Add, LocalGroceryStore } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
 import { styled } from '@mui/system';
 
@@ -32,7 +32,8 @@ function App() {
   const [items, setItems] = useState<GroceryItem[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [predefinedItems, setPredefinedItems] = useState<{ [key: string]: [string, string][] }>({});
-  const { control, handleSubmit, reset } = useForm();
+  const [isLoading, setIsLoading] = useState(true);
+  const { control, handleSubmit, reset, setValue } = useForm();
 
   useEffect(() => {
     fetchItems();
@@ -45,9 +46,18 @@ function App() {
   };
 
   const fetchCategories = async () => {
-    const result = await backend.getCategories();
-    setCategories(result);
-    result.forEach(fetchPredefinedItems);
+    try {
+      const result = await backend.getCategories();
+      setCategories(result);
+      result.forEach(fetchPredefinedItems);
+      if (result.length > 0) {
+        setValue('category', result[0]);
+      }
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      setIsLoading(false);
+    }
   };
 
   const fetchPredefinedItems = async (category: string) => {
@@ -76,6 +86,14 @@ function App() {
     fetchItems();
   };
 
+  if (isLoading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <>
       <AppBar position="static" color="primary" elevation={0}>
@@ -101,29 +119,28 @@ function App() {
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Controller
-                  name="category"
-                  control={control}
-                  defaultValue={categories[0] || ''}
-                  rules={{ required: true }}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      select
-                      label="Category"
-                      fullWidth
-                      SelectProps={{
-                        native: true,
-                      }}
-                    >
-                      {categories.map((category) => (
-                        <option key={category} value={category}>
-                          {category}
-                        </option>
-                      ))}
-                    </TextField>
-                  )}
-                />
+                <FormControl fullWidth>
+                  <InputLabel id="category-label">Category</InputLabel>
+                  <Controller
+                    name="category"
+                    control={control}
+                    defaultValue={categories[0] || ''}
+                    rules={{ required: true }}
+                    render={({ field }) => (
+                      <Select
+                        {...field}
+                        labelId="category-label"
+                        label="Category"
+                      >
+                        {categories.map((category) => (
+                          <MenuItem key={category} value={category}>
+                            {category}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                </FormControl>
               </Grid>
               <Grid item xs={12}>
                 <Button type="submit" variant="contained" color="primary" fullWidth startIcon={<Add />}>
