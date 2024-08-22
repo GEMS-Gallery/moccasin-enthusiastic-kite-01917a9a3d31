@@ -193,16 +193,11 @@ function App() {
           <StyledPaper key={category} elevation={3}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
               <Typography variant="h5" component="div">{category}</Typography>
-              <Box display="flex" alignItems="center">
-                <Typography variant="subtitle1" sx={{ mr: 1 }}>
-                  Items: {getCategoryItemCount(category)}
-                </Typography>
-                <Tooltip title={`${getCategoryItemCount(category)} items in ${category}`} arrow>
-                  <Badge badgeContent={getCategoryItemCount(category)} color="primary">
-                    <LocalGroceryStore />
-                  </Badge>
-                </Tooltip>
-              </Box>
+              <Tooltip title={`${getCategoryItemCount(category)} items in ${category}`} arrow>
+                <Badge badgeContent={getCategoryItemCount(category)} color="primary">
+                  <LocalGroceryStore />
+                </Badge>
+              </Tooltip>
             </Box>
             <Box sx={{ mb: 2 }}>
               {predefinedItems[category]?.map(([item, emoji]) => (
