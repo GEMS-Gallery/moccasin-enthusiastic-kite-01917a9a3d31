@@ -6,10 +6,9 @@ type GroceryItem =
    id: nat;
    isPredefined: bool;
    name: text;
-   quantity: nat;
  };
 service : {
-  addItem: (text, text, bool, text, nat) -> (nat);
+  addItem: (text, text, bool, text) -> (nat);
   getCategories: () -> (vec text) query;
   getItems: () -> (vec GroceryItem) query;
   getPredefinedItems: (text) -> (vec record {

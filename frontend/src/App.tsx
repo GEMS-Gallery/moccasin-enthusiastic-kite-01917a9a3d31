@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { backend } from 'declarations/backend';
-import { Container, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, TextField, Button, Box, Grid, Chip, Divider, Paper, AppBar, Toolbar, Select, MenuItem, FormControl, InputLabel, CircularProgress, Badge, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Container, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, TextField, Button, Box, Grid, Chip, Divider, Paper, AppBar, Toolbar, Select, MenuItem, FormControl, InputLabel, CircularProgress } from '@mui/material';
 import { Delete, CheckCircle, Add, LocalGroceryStore } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
 import { styled } from '@mui/system';
 
 type GroceryItem = {
-  id: number;
+  id: bigint;
   name: string;
   category: string;
   completed: boolean;
   isPredefined: boolean;
   emoji: string;
-  quantity: number;
 };
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
@@ -34,8 +33,6 @@ function App() {
   const [categories, setCategories] = useState<string[]>([]);
   const [predefinedItems, setPredefinedItems] = useState<{ [key: string]: [string, string][] }>({});
   const [isLoading, setIsLoading] = useState(true);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [selectedPredefinedItem, setSelectedPredefinedItem] = useState<{ name: string, emoji: string, category: string } | null>(null);
   const { control, handleSubmit, reset, setValue } = useForm();
 
   useEffect(() => {
@@ -45,7 +42,7 @@ function App() {
 
   const fetchItems = async () => {
     const result = await backend.getItems();
-    setItems(result.map(item => ({ ...item, id: Number(item.id) })));
+    setItems(result);
   };
 
   const fetchCategories = async () => {
@@ -68,38 +65,25 @@ function App() {
     setPredefinedItems(prev => ({ ...prev, [category]: result }));
   };
 
-  const onSubmit = async (data: { name: string; category: string; quantity: number }) => {
-    await backend.addItem(data.name, data.category, false, '🛒', data.quantity);
+  const onSubmit = async (data: { name: string; category: string }) => {
+    await backend.addItem(data.name, data.category, false, '🛒');
     reset();
     fetchItems();
   };
 
-  const handleAddPredefinedItem = (name: string, emoji: string, category: string) => {
-    setSelectedPredefinedItem({ name, emoji, category });
-    setOpenDialog(true);
+  const handleAddPredefinedItem = async (name: string, emoji: string, category: string) => {
+    await backend.addItem(name, category, true, emoji);
+    fetchItems();
   };
 
-  const handleConfirmAddPredefinedItem = async (quantity: number) => {
-    if (selectedPredefinedItem) {
-      await backend.addItem(selectedPredefinedItem.name, selectedPredefinedItem.category, true, selectedPredefinedItem.emoji, quantity);
-      fetchItems();
-    }
-    setOpenDialog(false);
-    setSelectedPredefinedItem(null);
-  };
-
-  const handleComplete = async (id: number) => {
+  const handleComplete = async (id: bigint) => {
     await backend.markItemComplete(id);
     fetchItems();
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: bigint) => {
     await backend.removeItem(id);
     fetchItems();
-  };
-
-  const getCategoryItemCount = (category: string) => {
-    return items.filter(item => item.category === category).reduce((sum, item) => sum + item.quantity, 0);
   };
 
   if (isLoading) {
@@ -125,7 +109,7 @@ function App() {
           <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mb: 4 }}>
             <Typography variant="h5" gutterBottom>Add Custom Item</Typography>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={6}>
                 <Controller
                   name="name"
                   control={control}
@@ -134,7 +118,7 @@ function App() {
                   render={({ field }) => <TextField {...field} label="Item Name" fullWidth />}
                 />
               </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={6}>
                 <FormControl fullWidth>
                   <InputLabel id="category-label">Category</InputLabel>
                   <Controller
@@ -158,15 +142,6 @@ function App() {
                   />
                 </FormControl>
               </Grid>
-              <Grid item xs={12} sm={4}>
-                <Controller
-                  name="quantity"
-                  control={control}
-                  defaultValue={1}
-                  rules={{ required: true, min: 1 }}
-                  render={({ field }) => <TextField {...field} label="Quantity" type="number" fullWidth InputProps={{ inputProps: { min: 1 } }} />}
-                />
-              </Grid>
               <Grid item xs={12}>
                 <Button type="submit" variant="contained" color="primary" fullWidth startIcon={<Add />}>
                   Add Item
@@ -178,12 +153,7 @@ function App() {
 
         {categories.map((category) => (
           <StyledPaper key={category} elevation={3}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-              <Typography variant="h5" component="div">{category}</Typography>
-              <Badge badgeContent={getCategoryItemCount(category)} color="primary">
-                <LocalGroceryStore />
-              </Badge>
-            </Box>
+            <Typography variant="h5" gutterBottom>{category}</Typography>
             <Box sx={{ mb: 2 }}>
               {predefinedItems[category]?.map(([item, emoji]) => (
                 <StyledChip
@@ -196,13 +166,13 @@ function App() {
             </Box>
             <List>
               {items.filter(item => item.category === category).map((item) => (
-                <ListItem key={item.id} sx={{
+                <ListItem key={Number(item.id)} sx={{
                   bgcolor: item.completed ? 'rgba(76, 175, 80, 0.1)' : 'inherit',
                   borderRadius: '8px',
                   mb: 1,
                 }}>
                   <ListItemText
-                    primary={`${item.emoji} ${item.name} (${item.quantity})`}
+                    primary={`${item.emoji} ${item.name}`}
                     sx={{ textDecoration: item.completed ? 'line-through' : 'none' }}
                   />
                   <ListItemSecondaryAction>
@@ -219,27 +189,6 @@ function App() {
           </StyledPaper>
         ))}
       </Container>
-
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Add {selectedPredefinedItem?.name}</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Quantity"
-            type="number"
-            fullWidth
-            variant="standard"
-            defaultValue={1}
-            InputProps={{ inputProps: { min: 1 } }}
-            onChange={(e) => setValue('predefinedQuantity', parseInt(e.target.value))}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-          <Button onClick={() => handleConfirmAddPredefinedItem(1)}>Add</Button>
-        </DialogActions>
-      </Dialog>
     </>
   );
 }

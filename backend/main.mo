@@ -17,7 +17,6 @@ actor {
     completed: Bool;
     isPredefined: Bool;
     emoji: Text;
-    quantity: Nat;
   };
 
   // Stable variables for persistence
@@ -67,7 +66,7 @@ actor {
   };
 
   // Add a new grocery item (custom or predefined)
-  public func addItem(name: Text, category: Text, isPredefined: Bool, emoji: Text, quantity: Nat) : async Nat {
+  public func addItem(name: Text, category: Text, isPredefined: Bool, emoji: Text) : async Nat {
     let id = nextId;
     let item: GroceryItem = {
       id = id;
@@ -76,7 +75,6 @@ actor {
       completed = false;
       isPredefined = isPredefined;
       emoji = emoji;
-      quantity = quantity;
     };
     groceryItems.put(id, item);
     nextId += 1;
@@ -100,7 +98,6 @@ actor {
           completed = true;
           isPredefined = item.isPredefined;
           emoji = item.emoji;
-          quantity = item.quantity;
         };
         groceryItems.put(id, updatedItem);
         true
