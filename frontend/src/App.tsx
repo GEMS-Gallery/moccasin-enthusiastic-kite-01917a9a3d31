@@ -45,7 +45,11 @@ function App() {
 
   const fetchItems = async () => {
     const result = await backend.getItems();
-    setItems(result.map(item => ({ ...item, id: Number(item.id) })));
+    setItems(result.map(item => ({
+      ...item,
+      id: Number(item.id),
+      quantity: Number(item.quantity)
+    })));
   };
 
   const fetchCategories = async () => {
@@ -99,7 +103,9 @@ function App() {
   };
 
   const getCategoryItemCount = (category: string) => {
-    return items.filter(item => item.category === category).reduce((sum, item) => sum + item.quantity, 0);
+    return items
+      .filter(item => item.category === category)
+      .reduce((sum, item) => sum + item.quantity, 0);
   };
 
   if (isLoading) {

@@ -1,10 +1,10 @@
 import Bool "mo:base/Bool";
 import Hash "mo:base/Hash";
-import Nat "mo:base/Nat";
 
 import Array "mo:base/Array";
 import Text "mo:base/Text";
 import Int "mo:base/Int";
+import Nat "mo:base/Nat";
 import Iter "mo:base/Iter";
 import HashMap "mo:base/HashMap";
 
