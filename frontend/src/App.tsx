@@ -6,7 +6,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { styled } from '@mui/system';
 
 type GroceryItem = {
-  id: bigint;
+  id: number;
   name: string;
   category: string;
   completed: boolean;
@@ -45,7 +45,7 @@ function App() {
 
   const fetchItems = async () => {
     const result = await backend.getItems();
-    setItems(result);
+    setItems(result.map(item => ({ ...item, id: Number(item.id) })));
   };
 
   const fetchCategories = async () => {
@@ -88,12 +88,12 @@ function App() {
     setSelectedPredefinedItem(null);
   };
 
-  const handleComplete = async (id: bigint) => {
+  const handleComplete = async (id: number) => {
     await backend.markItemComplete(id);
     fetchItems();
   };
 
-  const handleDelete = async (id: bigint) => {
+  const handleDelete = async (id: number) => {
     await backend.removeItem(id);
     fetchItems();
   };
@@ -196,7 +196,7 @@ function App() {
             </Box>
             <List>
               {items.filter(item => item.category === category).map((item) => (
-                <ListItem key={Number(item.id)} sx={{
+                <ListItem key={item.id} sx={{
                   bgcolor: item.completed ? 'rgba(76, 175, 80, 0.1)' : 'inherit',
                   borderRadius: '8px',
                   mb: 1,
