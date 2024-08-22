@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { backend } from 'declarations/backend';
-import { Container, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, TextField, Button, Box, Grid, Chip, Tabs, Tab } from '@mui/material';
+import { Container, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, TextField, Button, Box, Grid, Chip, Divider } from '@mui/material';
 import { Delete, CheckCircle, Add } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
 
@@ -15,15 +15,13 @@ type GroceryItem = {
 
 function App() {
   const [items, setItems] = useState<GroceryItem[]>([]);
-  const [foodItems, setFoodItems] = useState<[string, string][]>([]);
-  const [supplyItems, setSupplyItems] = useState<[string, string][]>([]);
-  const [currentCategory, setCurrentCategory] = useState<string>('Food');
+  const [categories, setCategories] = useState<string[]>([]);
+  const [predefinedItems, setPredefinedItems] = useState<{ [key: string]: [string, string][] }>({});
   const { control, handleSubmit, reset } = useForm();
 
   useEffect(() => {
     fetchItems();
-    fetchPredefinedItems('Food');
-    fetchPredefinedItems('Supplies');
+    fetchCategories();
   }, []);
 
   const fetchItems = async () => {
@@ -31,13 +29,15 @@ function App() {
     setItems(result);
   };
 
+  const fetchCategories = async () => {
+    const result = await backend.getCategories();
+    setCategories(result);
+    result.forEach(fetchPredefinedItems);
+  };
+
   const fetchPredefinedItems = async (category: string) => {
     const result = await backend.getPredefinedItems(category);
-    if (category === 'Food') {
-      setFoodItems(result);
-    } else if (category === 'Supplies') {
-      setSupplyItems(result);
-    }
+    setPredefinedItems(prev => ({ ...prev, [category]: result }));
   };
 
   const onSubmit = async (data: { name: string; category: string }) => {
@@ -46,8 +46,8 @@ function App() {
     fetchItems();
   };
 
-  const handleAddPredefinedItem = async (name: string, emoji: string) => {
-    await backend.addItem(name, currentCategory, true, emoji);
+  const handleAddPredefinedItem = async (name: string, emoji: string, category: string) => {
+    await backend.addItem(name, category, true, emoji);
     fetchItems();
   };
 
@@ -61,30 +61,30 @@ function App() {
     fetchItems();
   };
 
-  const handleCategoryChange = (event: React.SyntheticEvent, newValue: string) => {
-    setCurrentCategory(newValue);
-  };
-
   return (
-    <Container maxWidth="sm">
+    <Container maxWidth="md">
       <Typography variant="h4" component="h1" gutterBottom>
         Grocery List
       </Typography>
-      <Tabs value={currentCategory} onChange={handleCategoryChange} centered>
-        <Tab label="Food" value="Food" />
-        <Tab label="Supplies" value="Supplies" />
-      </Tabs>
-      <Grid container spacing={2} sx={{ mt: 2 }}>
-        {(currentCategory === 'Food' ? foodItems : supplyItems).map(([item, emoji]) => (
-          <Grid item key={item}>
-            <Chip
-              label={`${emoji} ${item}`}
-              onClick={() => handleAddPredefinedItem(item, emoji)}
-              icon={<Add />}
-            />
+      {categories.map((category) => (
+        <Box key={category} sx={{ mb: 4 }}>
+          <Typography variant="h5" component="h2" gutterBottom>
+            {category}
+          </Typography>
+          <Grid container spacing={2} sx={{ mb: 2 }}>
+            {predefinedItems[category]?.map(([item, emoji]) => (
+              <Grid item key={item}>
+                <Chip
+                  label={`${emoji} ${item}`}
+                  onClick={() => handleAddPredefinedItem(item, emoji, category)}
+                  icon={<Add />}
+                />
+              </Grid>
+            ))}
           </Grid>
-        ))}
-      </Grid>
+          <Divider sx={{ my: 2 }} />
+        </Box>
+      ))}
       <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ my: 2 }}>
         <Controller
           name="name"
@@ -96,7 +96,7 @@ function App() {
         <Controller
           name="category"
           control={control}
-          defaultValue={currentCategory}
+          defaultValue={categories[0] || ''}
           rules={{ required: true }}
           render={({ field }) => (
             <TextField
@@ -109,8 +109,11 @@ function App() {
                 native: true,
               }}
             >
-              <option value="Food">Food</option>
-              <option value="Supplies">Supplies</option>
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
             </TextField>
           )}
         />

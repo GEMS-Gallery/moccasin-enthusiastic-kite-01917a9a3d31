@@ -42,13 +42,27 @@ actor {
     ("Toilet Paper", "🧻"), ("Tissues", "🤧"), ("Sponges", "🧽")
   ];
 
+  // Predefined list of household items with emojis
+  let predefinedHousehold: [(Text, Text)] = [
+    ("Light Bulbs", "💡"), ("Batteries", "🔋"), ("Candles", "🕯️"),
+    ("Air Freshener", "🌸"), ("Cleaning Gloves", "🧤"), ("Broom", "🧹"),
+    ("Mop", "🧼"), ("Dustpan", "🧹"), ("Garbage Bags", "🗑️"),
+    ("Dish Cloths", "🧽"), ("Scrub Brush", "🧽"), ("Plunger", "🪠")
+  ];
+
   // Get predefined items by category
   public query func getPredefinedItems(category: Text) : async [(Text, Text)] {
     switch (category) {
       case ("Food") { predefinedFood };
       case ("Supplies") { predefinedSupplies };
+      case ("Household") { predefinedHousehold };
       case (_) { [] };
     }
+  };
+
+  // Get all categories
+  public query func getCategories() : async [Text] {
+    ["Food", "Supplies", "Household"]
   };
 
   // Add a new grocery item (custom or predefined)

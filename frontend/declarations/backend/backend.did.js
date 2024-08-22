@@ -13,6 +13,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Nat],
         [],
       ),
+    'getCategories' : IDL.Func([], [IDL.Vec(IDL.Text)], ['query']),
     'getItems' : IDL.Func([], [IDL.Vec(GroceryItem)], ['query']),
     'getPredefinedItems' : IDL.Func(
         [IDL.Text],

@@ -12,6 +12,7 @@ export interface GroceryItem {
 }
 export interface _SERVICE {
   'addItem' : ActorMethod<[string, string, boolean, string], bigint>,
+  'getCategories' : ActorMethod<[], Array<string>>,
   'getItems' : ActorMethod<[], Array<GroceryItem>>,
   'getPredefinedItems' : ActorMethod<[string], Array<[string, string]>>,
   'markItemComplete' : ActorMethod<[bigint], boolean>,
