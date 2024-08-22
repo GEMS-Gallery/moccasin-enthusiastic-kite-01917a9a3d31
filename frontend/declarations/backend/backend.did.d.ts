@@ -8,10 +8,11 @@ export interface GroceryItem {
   'name' : string,
   'completed' : boolean,
   'emoji' : string,
+  'quantity' : bigint,
   'category' : string,
 }
 export interface _SERVICE {
-  'addItem' : ActorMethod<[string, string, boolean, string], bigint>,
+  'addItem' : ActorMethod<[string, string, boolean, string, bigint], bigint>,
   'getCategories' : ActorMethod<[], Array<string>>,
   'getItems' : ActorMethod<[], Array<GroceryItem>>,
   'getPredefinedItems' : ActorMethod<[string], Array<[string, string]>>,

@@ -5,11 +5,12 @@ export const idlFactory = ({ IDL }) => {
     'name' : IDL.Text,
     'completed' : IDL.Bool,
     'emoji' : IDL.Text,
+    'quantity' : IDL.Nat,
     'category' : IDL.Text,
   });
   return IDL.Service({
     'addItem' : IDL.Func(
-        [IDL.Text, IDL.Text, IDL.Bool, IDL.Text],
+        [IDL.Text, IDL.Text, IDL.Bool, IDL.Text, IDL.Nat],
         [IDL.Nat],
         [],
       ),
