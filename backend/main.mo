@@ -116,6 +116,26 @@ actor {
     }
   };
 
+  // Update item quantity
+  public func updateItemQuantity(id: Nat, newQuantity: Nat) : async Bool {
+    switch (groceryItems.get(id)) {
+      case (null) { false };
+      case (?item) {
+        let updatedItem: GroceryItem = {
+          id = item.id;
+          name = item.name;
+          category = item.category;
+          completed = item.completed;
+          isPredefined = item.isPredefined;
+          emoji = item.emoji;
+          quantity = newQuantity;
+        };
+        groceryItems.put(id, updatedItem);
+        true
+      };
+    }
+  };
+
   // System functions for upgrades
   system func preupgrade() {
     groceryItemsEntries := Iter.toArray(groceryItems.entries());

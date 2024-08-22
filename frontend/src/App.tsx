@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { backend } from 'declarations/backend';
 import { Container, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, TextField, Button, Box, Grid, Chip, Divider, Paper, AppBar, Toolbar, Select, MenuItem, FormControl, InputLabel, CircularProgress, Badge, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip } from '@mui/material';
-import { Delete, CheckCircle, Add, LocalGroceryStore } from '@mui/icons-material';
+import { Delete, CheckCircle, Add, LocalGroceryStore, Remove } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
 import { styled } from '@mui/system';
 
@@ -100,6 +100,13 @@ function App() {
   const handleDelete = async (id: number) => {
     await backend.removeItem(id);
     fetchItems();
+  };
+
+  const handleQuantityChange = async (id: number, newQuantity: number) => {
+    if (newQuantity > 0) {
+      await backend.updateItemQuantity(id, newQuantity);
+      fetchItems();
+    }
   };
 
   const getCategoryItemCount = (category: string) => {
@@ -215,10 +222,17 @@ function App() {
                   mb: 1,
                 }}>
                   <ListItemText
-                    primary={`${item.emoji} ${item.name} (${item.quantity})`}
+                    primary={`${item.emoji} ${item.name}`}
+                    secondary={`Quantity: ${item.quantity}`}
                     sx={{ textDecoration: item.completed ? 'line-through' : 'none' }}
                   />
                   <ListItemSecondaryAction>
+                    <IconButton edge="end" aria-label="decrease" onClick={() => handleQuantityChange(item.id, item.quantity - 1)} disabled={item.quantity <= 1}>
+                      <Remove />
+                    </IconButton>
+                    <IconButton edge="end" aria-label="increase" onClick={() => handleQuantityChange(item.id, item.quantity + 1)}>
+                      <Add />
+                    </IconButton>
                     <IconButton edge="end" aria-label="complete" onClick={() => handleComplete(item.id)} disabled={item.completed}>
                       <CheckCircle />
                     </IconButton>
@@ -250,7 +264,7 @@ function App() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-          <Button onClick={() => handleConfirmAddPredefinedItem(1)}>Add</Button>
+          <Button onClick={() => handleConfirmAddPredefinedItem(Number(control._formValues.predefinedQuantity) || 1)}>Add</Button>
         </DialogActions>
       </Dialog>
     </>

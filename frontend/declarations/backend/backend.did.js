@@ -23,6 +23,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'markItemComplete' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'removeItem' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'updateItemQuantity' : IDL.Func([IDL.Nat, IDL.Nat], [IDL.Bool], []),
   });
 };
 export const init = ({ IDL }) => { return []; };

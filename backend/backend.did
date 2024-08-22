@@ -18,4 +18,5 @@ service : {
                                      }) query;
   markItemComplete: (nat) -> (bool);
   removeItem: (nat) -> (bool);
+  updateItemQuantity: (nat, nat) -> (bool);
 }
