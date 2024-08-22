@@ -15,6 +15,7 @@ actor {
     name: Text;
     category: Text;
     completed: Bool;
+    isPredefined: Bool;
   };
 
   // Stable variables for persistence
@@ -24,14 +25,26 @@ actor {
   // Create a HashMap to store grocery items
   let groceryItems = HashMap.fromIter<Nat, GroceryItem>(groceryItemsEntries.vals(), 0, Int.equal, Int.hash);
 
-  // Add a new grocery item
-  public func addItem(name: Text, category: Text) : async Nat {
+  // Predefined list of food items
+  let predefinedItems: [Text] = [
+    "Apple", "Banana", "Bread", "Milk", "Eggs", "Cheese", "Chicken", "Rice", "Pasta", "Tomato",
+    "Potato", "Onion", "Carrot", "Lettuce", "Cucumber", "Yogurt", "Cereal", "Coffee", "Tea", "Juice"
+  ];
+
+  // Get predefined items
+  public query func getPredefinedItems() : async [Text] {
+    predefinedItems
+  };
+
+  // Add a new grocery item (custom or predefined)
+  public func addItem(name: Text, category: Text, isPredefined: Bool) : async Nat {
     let id = nextId;
     let item: GroceryItem = {
       id = id;
       name = name;
       category = category;
       completed = false;
+      isPredefined = isPredefined;
     };
     groceryItems.put(id, item);
     nextId += 1;
@@ -53,6 +66,7 @@ actor {
           name = item.name;
           category = item.category;
           completed = true;
+          isPredefined = item.isPredefined;
         };
         groceryItems.put(id, updatedItem);
         true

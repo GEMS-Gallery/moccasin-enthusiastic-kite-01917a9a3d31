@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { backend } from 'declarations/backend';
-import { Container, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, TextField, Button, Box } from '@mui/material';
-import { Delete, CheckCircle } from '@mui/icons-material';
+import { Container, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, TextField, Button, Box, Grid, Chip } from '@mui/material';
+import { Delete, CheckCircle, Add } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
 
 type GroceryItem = {
@@ -9,14 +9,17 @@ type GroceryItem = {
   name: string;
   category: string;
   completed: boolean;
+  isPredefined: boolean;
 };
 
 function App() {
   const [items, setItems] = useState<GroceryItem[]>([]);
+  const [predefinedItems, setPredefinedItems] = useState<string[]>([]);
   const { control, handleSubmit, reset } = useForm();
 
   useEffect(() => {
     fetchItems();
+    fetchPredefinedItems();
   }, []);
 
   const fetchItems = async () => {
@@ -24,9 +27,19 @@ function App() {
     setItems(result);
   };
 
+  const fetchPredefinedItems = async () => {
+    const result = await backend.getPredefinedItems();
+    setPredefinedItems(result);
+  };
+
   const onSubmit = async (data: { name: string; category: string }) => {
-    await backend.addItem(data.name, data.category);
+    await backend.addItem(data.name, data.category, false);
     reset();
+    fetchItems();
+  };
+
+  const handleAddPredefinedItem = async (name: string) => {
+    await backend.addItem(name, 'Predefined', true);
     fetchItems();
   };
 
@@ -45,13 +58,24 @@ function App() {
       <Typography variant="h4" component="h1" gutterBottom>
         Grocery List
       </Typography>
-      <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mb: 2 }}>
+      <Grid container spacing={2}>
+        {predefinedItems.map((item) => (
+          <Grid item key={item}>
+            <Chip
+              label={item}
+              onClick={() => handleAddPredefinedItem(item)}
+              icon={<Add />}
+            />
+          </Grid>
+        ))}
+      </Grid>
+      <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ my: 2 }}>
         <Controller
           name="name"
           control={control}
           defaultValue=""
           rules={{ required: true }}
-          render={({ field }) => <TextField {...field} label="Item Name" fullWidth margin="normal" />}
+          render={({ field }) => <TextField {...field} label="Custom Item Name" fullWidth margin="normal" />}
         />
         <Controller
           name="category"
@@ -60,8 +84,8 @@ function App() {
           rules={{ required: true }}
           render={({ field }) => <TextField {...field} label="Category" fullWidth margin="normal" />}
         />
-        <Button type="submit" variant="contained" color="primary" fullWidth>
-          Add Item
+        <Button type="submit" variant="contained" color="primary" fullWidth startIcon={<Add />}>
+          Add Custom Item
         </Button>
       </Box>
       <List>

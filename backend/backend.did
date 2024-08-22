@@ -3,11 +3,13 @@ type GroceryItem =
    category: text;
    completed: bool;
    id: nat;
+   isPredefined: bool;
    name: text;
  };
 service : {
-  addItem: (text, text) -> (nat);
+  addItem: (text, text, bool) -> (nat);
   getItems: () -> (vec GroceryItem) query;
+  getPredefinedItems: () -> (vec text) query;
   markItemComplete: (nat) -> (bool);
   removeItem: (nat) -> (bool);
 }
