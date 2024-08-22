@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { backend } from 'declarations/backend';
-import { Container, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, TextField, Button, Box, Grid, Chip } from '@mui/material';
+import { Container, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, TextField, Button, Box, Grid, Chip, Tabs, Tab } from '@mui/material';
 import { Delete, CheckCircle, Add } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
 
@@ -15,12 +15,15 @@ type GroceryItem = {
 
 function App() {
   const [items, setItems] = useState<GroceryItem[]>([]);
-  const [predefinedItems, setPredefinedItems] = useState<[string, string][]>([]);
+  const [foodItems, setFoodItems] = useState<[string, string][]>([]);
+  const [supplyItems, setSupplyItems] = useState<[string, string][]>([]);
+  const [currentCategory, setCurrentCategory] = useState<string>('Food');
   const { control, handleSubmit, reset } = useForm();
 
   useEffect(() => {
     fetchItems();
-    fetchPredefinedItems();
+    fetchPredefinedItems('Food');
+    fetchPredefinedItems('Supplies');
   }, []);
 
   const fetchItems = async () => {
@@ -28,9 +31,13 @@ function App() {
     setItems(result);
   };
 
-  const fetchPredefinedItems = async () => {
-    const result = await backend.getPredefinedItems();
-    setPredefinedItems(result);
+  const fetchPredefinedItems = async (category: string) => {
+    const result = await backend.getPredefinedItems(category);
+    if (category === 'Food') {
+      setFoodItems(result);
+    } else if (category === 'Supplies') {
+      setSupplyItems(result);
+    }
   };
 
   const onSubmit = async (data: { name: string; category: string }) => {
@@ -40,7 +47,7 @@ function App() {
   };
 
   const handleAddPredefinedItem = async (name: string, emoji: string) => {
-    await backend.addItem(name, 'Predefined', true, emoji);
+    await backend.addItem(name, currentCategory, true, emoji);
     fetchItems();
   };
 
@@ -54,13 +61,21 @@ function App() {
     fetchItems();
   };
 
+  const handleCategoryChange = (event: React.SyntheticEvent, newValue: string) => {
+    setCurrentCategory(newValue);
+  };
+
   return (
     <Container maxWidth="sm">
       <Typography variant="h4" component="h1" gutterBottom>
         Grocery List
       </Typography>
-      <Grid container spacing={2}>
-        {predefinedItems.map(([item, emoji]) => (
+      <Tabs value={currentCategory} onChange={handleCategoryChange} centered>
+        <Tab label="Food" value="Food" />
+        <Tab label="Supplies" value="Supplies" />
+      </Tabs>
+      <Grid container spacing={2} sx={{ mt: 2 }}>
+        {(currentCategory === 'Food' ? foodItems : supplyItems).map(([item, emoji]) => (
           <Grid item key={item}>
             <Chip
               label={`${emoji} ${item}`}
@@ -81,9 +96,23 @@ function App() {
         <Controller
           name="category"
           control={control}
-          defaultValue=""
+          defaultValue={currentCategory}
           rules={{ required: true }}
-          render={({ field }) => <TextField {...field} label="Category" fullWidth margin="normal" />}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              select
+              label="Category"
+              fullWidth
+              margin="normal"
+              SelectProps={{
+                native: true,
+              }}
+            >
+              <option value="Food">Food</option>
+              <option value="Supplies">Supplies</option>
+            </TextField>
+          )}
         />
         <Button type="submit" variant="contained" color="primary" fullWidth startIcon={<Add />}>
           Add Custom Item

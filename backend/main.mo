@@ -27,16 +27,28 @@ actor {
   let groceryItems = HashMap.fromIter<Nat, GroceryItem>(groceryItemsEntries.vals(), 0, Int.equal, Int.hash);
 
   // Predefined list of food items with emojis
-  let predefinedItems: [(Text, Text)] = [
+  let predefinedFood: [(Text, Text)] = [
     ("Apple", "🍎"), ("Banana", "🍌"), ("Bread", "🍞"), ("Milk", "🥛"), ("Eggs", "🥚"),
     ("Cheese", "🧀"), ("Chicken", "🍗"), ("Rice", "🍚"), ("Pasta", "🍝"), ("Tomato", "🍅"),
     ("Potato", "🥔"), ("Onion", "🧅"), ("Carrot", "🥕"), ("Lettuce", "🥬"), ("Cucumber", "🥒"),
     ("Yogurt", "🥛"), ("Cereal", "🥣"), ("Coffee", "☕"), ("Tea", "🍵"), ("Juice", "🧃")
   ];
 
-  // Get predefined items
-  public query func getPredefinedItems() : async [(Text, Text)] {
-    predefinedItems
+  // Predefined list of supplies with emojis
+  let predefinedSupplies: [(Text, Text)] = [
+    ("Paper Towels", "🧻"), ("Dish Soap", "🧼"), ("Laundry Detergent", "🧺"),
+    ("Trash Bags", "🗑️"), ("Aluminum Foil", "🔲"), ("Plastic Wrap", "🎁"),
+    ("Toothpaste", "🦷"), ("Shampoo", "🧴"), ("Soap", "🧼"),
+    ("Toilet Paper", "🧻"), ("Tissues", "🤧"), ("Sponges", "🧽")
+  ];
+
+  // Get predefined items by category
+  public query func getPredefinedItems(category: Text) : async [(Text, Text)] {
+    switch (category) {
+      case ("Food") { predefinedFood };
+      case ("Supplies") { predefinedSupplies };
+      case (_) { [] };
+    }
   };
 
   // Add a new grocery item (custom or predefined)

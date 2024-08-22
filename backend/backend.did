@@ -10,10 +10,10 @@ type GroceryItem =
 service : {
   addItem: (text, text, bool, text) -> (nat);
   getItems: () -> (vec GroceryItem) query;
-  getPredefinedItems: () -> (vec record {
-                                   text;
-                                   text;
-                                 }) query;
+  getPredefinedItems: (text) -> (vec record {
+                                       text;
+                                       text;
+                                     }) query;
   markItemComplete: (nat) -> (bool);
   removeItem: (nat) -> (bool);
 }

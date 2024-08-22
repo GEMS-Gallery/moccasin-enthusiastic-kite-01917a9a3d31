@@ -15,7 +15,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'getItems' : IDL.Func([], [IDL.Vec(GroceryItem)], ['query']),
     'getPredefinedItems' : IDL.Func(
-        [],
+        [IDL.Text],
         [IDL.Vec(IDL.Tuple(IDL.Text, IDL.Text))],
         ['query'],
       ),
