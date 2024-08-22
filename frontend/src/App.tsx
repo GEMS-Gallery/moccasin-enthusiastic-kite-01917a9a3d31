@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { backend } from 'declarations/backend';
-import { Container, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, TextField, Button, Box, Grid, Chip, Divider, Paper, AppBar, Toolbar, Select, MenuItem, FormControl, InputLabel, CircularProgress } from '@mui/material';
+import { Container, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, TextField, Button, Box, Grid, Chip, Divider, Paper, AppBar, Toolbar, Select, MenuItem, FormControl, InputLabel, CircularProgress, Badge } from '@mui/material';
 import { Delete, CheckCircle, Add, LocalGroceryStore } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
 import { styled } from '@mui/system';
@@ -86,6 +86,10 @@ function App() {
     fetchItems();
   };
 
+  const getCategoryItemCount = (category: string) => {
+    return items.filter(item => item.category === category).length;
+  };
+
   if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
@@ -153,7 +157,12 @@ function App() {
 
         {categories.map((category) => (
           <StyledPaper key={category} elevation={3}>
-            <Typography variant="h5" gutterBottom>{category}</Typography>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+              <Typography variant="h5" component="div">{category}</Typography>
+              <Badge badgeContent={getCategoryItemCount(category)} color="primary">
+                <LocalGroceryStore />
+              </Badge>
+            </Box>
             <Box sx={{ mb: 2 }}>
               {predefinedItems[category]?.map(([item, emoji]) => (
                 <StyledChip
