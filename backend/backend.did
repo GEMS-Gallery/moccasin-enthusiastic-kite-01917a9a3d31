@@ -1,0 +1,13 @@
+type GroceryItem = 
+ record {
+   category: text;
+   completed: bool;
+   id: nat;
+   name: text;
+ };
+service : {
+  addItem: (text, text) -> (nat);
+  getItems: () -> (vec GroceryItem) query;
+  markItemComplete: (nat) -> (bool);
+  removeItem: (nat) -> (bool);
+}
