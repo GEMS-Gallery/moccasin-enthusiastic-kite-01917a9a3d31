@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { backend } from 'declarations/backend';
-import { Container, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, TextField, Button, Box, Grid, Chip, Divider, Paper, AppBar, Toolbar, Select, MenuItem, FormControl, InputLabel, CircularProgress, Badge, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip } from '@mui/material';
+import { Container, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, TextField, Button, Box, Grid, Chip, Divider, Paper, AppBar, Toolbar, Select, MenuItem, FormControl, InputLabel, CircularProgress, Badge, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, Snackbar } from '@mui/material';
 import { Delete, CheckCircle, Add, LocalGroceryStore, Remove } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
 import { styled } from '@mui/system';
@@ -36,6 +36,8 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedPredefinedItem, setSelectedPredefinedItem] = useState<{ name: string, emoji: string, category: string } | null>(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
   const { control, handleSubmit, reset, setValue } = useForm();
 
   useEffect(() => {
@@ -44,12 +46,18 @@ function App() {
   }, []);
 
   const fetchItems = async () => {
-    const result = await backend.getItems();
-    setItems(result.map(item => ({
-      ...item,
-      id: Number(item.id),
-      quantity: Number(item.quantity)
-    })));
+    try {
+      const result = await backend.getItems();
+      setItems(result.map(item => ({
+        ...item,
+        id: Number(item.id),
+        quantity: Number(item.quantity)
+      })));
+    } catch (error) {
+      console.error('Error fetching items:', error);
+      setSnackbarMessage('Failed to fetch items. Please try again.');
+      setSnackbarOpen(true);
+    }
   };
 
   const fetchCategories = async () => {
@@ -63,19 +71,37 @@ function App() {
       setIsLoading(false);
     } catch (error) {
       console.error('Error fetching categories:', error);
+      setSnackbarMessage('Failed to fetch categories. Please try again.');
+      setSnackbarOpen(true);
       setIsLoading(false);
     }
   };
 
   const fetchPredefinedItems = async (category: string) => {
-    const result = await backend.getPredefinedItems(category);
-    setPredefinedItems(prev => ({ ...prev, [category]: result }));
+    try {
+      const result = await backend.getPredefinedItems(category);
+      setPredefinedItems(prev => ({ ...prev, [category]: result }));
+    } catch (error) {
+      console.error(`Error fetching predefined items for ${category}:`, error);
+      setSnackbarMessage(`Failed to fetch predefined items for ${category}. Please try again.`);
+      setSnackbarOpen(true);
+    }
   };
 
   const onSubmit = async (data: { name: string; category: string; quantity: number }) => {
-    await backend.addItem(data.name, data.category, false, '🛒', data.quantity);
-    reset();
-    fetchItems();
+    try {
+      const result = await backend.addItem(data.name, data.category, false, '🛒', data.quantity);
+      if ('ok' in result) {
+        reset();
+        fetchItems();
+      } else {
+        throw new Error(result.err);
+      }
+    } catch (error) {
+      console.error('Error adding item:', error);
+      setSnackbarMessage('Failed to add item. Please try again.');
+      setSnackbarOpen(true);
+    }
   };
 
   const handleAddPredefinedItem = (name: string, emoji: string, category: string) => {
@@ -85,27 +111,67 @@ function App() {
 
   const handleConfirmAddPredefinedItem = async (quantity: number) => {
     if (selectedPredefinedItem) {
-      await backend.addItem(selectedPredefinedItem.name, selectedPredefinedItem.category, true, selectedPredefinedItem.emoji, quantity);
-      fetchItems();
+      try {
+        const result = await backend.addItem(selectedPredefinedItem.name, selectedPredefinedItem.category, true, selectedPredefinedItem.emoji, quantity);
+        if ('ok' in result) {
+          fetchItems();
+        } else {
+          throw new Error(result.err);
+        }
+      } catch (error) {
+        console.error('Error adding predefined item:', error);
+        setSnackbarMessage('Failed to add predefined item. Please try again.');
+        setSnackbarOpen(true);
+      }
     }
     setOpenDialog(false);
     setSelectedPredefinedItem(null);
   };
 
   const handleComplete = async (id: number) => {
-    await backend.markItemComplete(id);
-    fetchItems();
+    try {
+      const result = await backend.markItemComplete(id);
+      if ('ok' in result) {
+        fetchItems();
+      } else {
+        throw new Error(result.err);
+      }
+    } catch (error) {
+      console.error('Error marking item as complete:', error);
+      setSnackbarMessage('Failed to mark item as complete. Please try again.');
+      setSnackbarOpen(true);
+    }
   };
 
   const handleDelete = async (id: number) => {
-    await backend.removeItem(id);
-    fetchItems();
+    try {
+      const result = await backend.removeItem(id);
+      if ('ok' in result) {
+        fetchItems();
+      } else {
+        throw new Error(result.err);
+      }
+    } catch (error) {
+      console.error('Error removing item:', error);
+      setSnackbarMessage('Failed to remove item. Please try again.');
+      setSnackbarOpen(true);
+    }
   };
 
   const handleQuantityChange = async (id: number, newQuantity: number) => {
     if (newQuantity > 0) {
-      await backend.updateItemQuantity(id, newQuantity);
-      fetchItems();
+      try {
+        const result = await backend.updateItemQuantity(id, newQuantity);
+        if ('ok' in result) {
+          fetchItems();
+        } else {
+          throw new Error(result.err);
+        }
+      } catch (error) {
+        console.error('Error updating item quantity:', error);
+        setSnackbarMessage('Failed to update item quantity. Please try again.');
+        setSnackbarOpen(true);
+      }
     }
   };
 
@@ -262,6 +328,13 @@ function App() {
           <Button onClick={() => handleConfirmAddPredefinedItem(Number(control._formValues.predefinedQuantity) || 1)}>Add</Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+        message={snackbarMessage}
+      />
     </>
   );
 }

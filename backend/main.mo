@@ -1,5 +1,6 @@
 import Bool "mo:base/Bool";
 import Hash "mo:base/Hash";
+import Result "mo:base/Result";
 
 import Array "mo:base/Array";
 import Text "mo:base/Text";
@@ -7,6 +8,7 @@ import Int "mo:base/Int";
 import Nat "mo:base/Nat";
 import Iter "mo:base/Iter";
 import HashMap "mo:base/HashMap";
+import Error "mo:base/Error";
 
 actor {
   // Define the GroceryItem type
@@ -91,20 +93,24 @@ actor {
   };
 
   // Add a new grocery item (custom or predefined)
-  public func addItem(name: Text, category: Text, isPredefined: Bool, emoji: Text, quantity: Nat) : async Nat {
-    let id = nextId;
-    let item: GroceryItem = {
-      id = id;
-      name = name;
-      category = category;
-      completed = false;
-      isPredefined = isPredefined;
-      emoji = emoji;
-      quantity = quantity;
-    };
-    groceryItems.put(id, item);
-    nextId += 1;
-    id
+  public func addItem(name: Text, category: Text, isPredefined: Bool, emoji: Text, quantity: Nat) : async Result.Result<Nat, Text> {
+    try {
+      let id = nextId;
+      let item: GroceryItem = {
+        id = id;
+        name = name;
+        category = category;
+        completed = false;
+        isPredefined = isPredefined;
+        emoji = emoji;
+        quantity = quantity;
+      };
+      groceryItems.put(id, item);
+      nextId += 1;
+      #ok(id)
+    } catch (e) {
+      #err("Failed to add item: " # Error.message(e))
+    }
   };
 
   // Get all grocery items
@@ -113,9 +119,9 @@ actor {
   };
 
   // Mark an item as complete
-  public func markItemComplete(id: Nat) : async Bool {
+  public func markItemComplete(id: Nat) : async Result.Result<Bool, Text> {
     switch (groceryItems.get(id)) {
-      case (null) { false };
+      case (null) { #err("Item not found") };
       case (?item) {
         let updatedItem: GroceryItem = {
           id = item.id;
@@ -127,23 +133,23 @@ actor {
           quantity = item.quantity;
         };
         groceryItems.put(id, updatedItem);
-        true
+        #ok(true)
       };
     }
   };
 
   // Remove an item from the list
-  public func removeItem(id: Nat) : async Bool {
+  public func removeItem(id: Nat) : async Result.Result<Bool, Text> {
     switch (groceryItems.remove(id)) {
-      case (null) { false };
-      case (?_) { true };
+      case (null) { #err("Item not found") };
+      case (?_) { #ok(true) };
     }
   };
 
   // Update item quantity
-  public func updateItemQuantity(id: Nat, newQuantity: Nat) : async Bool {
+  public func updateItemQuantity(id: Nat, newQuantity: Nat) : async Result.Result<Bool, Text> {
     switch (groceryItems.get(id)) {
-      case (null) { false };
+      case (null) { #err("Item not found") };
       case (?item) {
         let updatedItem: GroceryItem = {
           id = item.id;
@@ -155,7 +161,7 @@ actor {
           quantity = newQuantity;
         };
         groceryItems.put(id, updatedItem);
-        true
+        #ok(true)
       };
     }
   };

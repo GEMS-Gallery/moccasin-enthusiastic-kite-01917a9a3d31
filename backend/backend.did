@@ -1,3 +1,13 @@
+type Result_1 = 
+ variant {
+   err: text;
+   ok: nat;
+ };
+type Result = 
+ variant {
+   err: text;
+   ok: bool;
+ };
 type GroceryItem = 
  record {
    category: text;
@@ -9,14 +19,14 @@ type GroceryItem =
    quantity: nat;
  };
 service : {
-  addItem: (text, text, bool, text, nat) -> (nat);
+  addItem: (text, text, bool, text, nat) -> (Result_1);
   getCategories: () -> (vec text) query;
   getItems: () -> (vec GroceryItem) query;
   getPredefinedItems: (text) -> (vec record {
                                        text;
                                        text;
                                      }) query;
-  markItemComplete: (nat) -> (bool);
-  removeItem: (nat) -> (bool);
-  updateItemQuantity: (nat, nat) -> (bool);
+  markItemComplete: (nat) -> (Result);
+  removeItem: (nat) -> (Result);
+  updateItemQuantity: (nat, nat) -> (Result);
 }

@@ -11,14 +11,18 @@ export interface GroceryItem {
   'quantity' : bigint,
   'category' : string,
 }
+export type Result = { 'ok' : boolean } |
+  { 'err' : string };
+export type Result_1 = { 'ok' : bigint } |
+  { 'err' : string };
 export interface _SERVICE {
-  'addItem' : ActorMethod<[string, string, boolean, string, bigint], bigint>,
+  'addItem' : ActorMethod<[string, string, boolean, string, bigint], Result_1>,
   'getCategories' : ActorMethod<[], Array<string>>,
   'getItems' : ActorMethod<[], Array<GroceryItem>>,
   'getPredefinedItems' : ActorMethod<[string], Array<[string, string]>>,
-  'markItemComplete' : ActorMethod<[bigint], boolean>,
-  'removeItem' : ActorMethod<[bigint], boolean>,
-  'updateItemQuantity' : ActorMethod<[bigint, bigint], boolean>,
+  'markItemComplete' : ActorMethod<[bigint], Result>,
+  'removeItem' : ActorMethod<[bigint], Result>,
+  'updateItemQuantity' : ActorMethod<[bigint, bigint], Result>,
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];
