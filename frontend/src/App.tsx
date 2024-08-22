@@ -10,11 +10,12 @@ type GroceryItem = {
   category: string;
   completed: boolean;
   isPredefined: boolean;
+  emoji: string;
 };
 
 function App() {
   const [items, setItems] = useState<GroceryItem[]>([]);
-  const [predefinedItems, setPredefinedItems] = useState<string[]>([]);
+  const [predefinedItems, setPredefinedItems] = useState<[string, string][]>([]);
   const { control, handleSubmit, reset } = useForm();
 
   useEffect(() => {
@@ -33,13 +34,13 @@ function App() {
   };
 
   const onSubmit = async (data: { name: string; category: string }) => {
-    await backend.addItem(data.name, data.category, false);
+    await backend.addItem(data.name, data.category, false, '🛒');
     reset();
     fetchItems();
   };
 
-  const handleAddPredefinedItem = async (name: string) => {
-    await backend.addItem(name, 'Predefined', true);
+  const handleAddPredefinedItem = async (name: string, emoji: string) => {
+    await backend.addItem(name, 'Predefined', true, emoji);
     fetchItems();
   };
 
@@ -59,11 +60,11 @@ function App() {
         Grocery List
       </Typography>
       <Grid container spacing={2}>
-        {predefinedItems.map((item) => (
+        {predefinedItems.map(([item, emoji]) => (
           <Grid item key={item}>
             <Chip
-              label={item}
-              onClick={() => handleAddPredefinedItem(item)}
+              label={`${emoji} ${item}`}
+              onClick={() => handleAddPredefinedItem(item, emoji)}
               icon={<Add />}
             />
           </Grid>
@@ -92,7 +93,7 @@ function App() {
         {items.map((item) => (
           <ListItem key={Number(item.id)} sx={{ bgcolor: item.completed ? 'rgba(76, 175, 80, 0.1)' : 'inherit' }}>
             <ListItemText
-              primary={item.name}
+              primary={`${item.emoji} ${item.name}`}
               secondary={item.category}
               sx={{ textDecoration: item.completed ? 'line-through' : 'none' }}
             />

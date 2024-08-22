@@ -16,6 +16,7 @@ actor {
     category: Text;
     completed: Bool;
     isPredefined: Bool;
+    emoji: Text;
   };
 
   // Stable variables for persistence
@@ -25,19 +26,21 @@ actor {
   // Create a HashMap to store grocery items
   let groceryItems = HashMap.fromIter<Nat, GroceryItem>(groceryItemsEntries.vals(), 0, Int.equal, Int.hash);
 
-  // Predefined list of food items
-  let predefinedItems: [Text] = [
-    "Apple", "Banana", "Bread", "Milk", "Eggs", "Cheese", "Chicken", "Rice", "Pasta", "Tomato",
-    "Potato", "Onion", "Carrot", "Lettuce", "Cucumber", "Yogurt", "Cereal", "Coffee", "Tea", "Juice"
+  // Predefined list of food items with emojis
+  let predefinedItems: [(Text, Text)] = [
+    ("Apple", "🍎"), ("Banana", "🍌"), ("Bread", "🍞"), ("Milk", "🥛"), ("Eggs", "🥚"),
+    ("Cheese", "🧀"), ("Chicken", "🍗"), ("Rice", "🍚"), ("Pasta", "🍝"), ("Tomato", "🍅"),
+    ("Potato", "🥔"), ("Onion", "🧅"), ("Carrot", "🥕"), ("Lettuce", "🥬"), ("Cucumber", "🥒"),
+    ("Yogurt", "🥛"), ("Cereal", "🥣"), ("Coffee", "☕"), ("Tea", "🍵"), ("Juice", "🧃")
   ];
 
   // Get predefined items
-  public query func getPredefinedItems() : async [Text] {
+  public query func getPredefinedItems() : async [(Text, Text)] {
     predefinedItems
   };
 
   // Add a new grocery item (custom or predefined)
-  public func addItem(name: Text, category: Text, isPredefined: Bool) : async Nat {
+  public func addItem(name: Text, category: Text, isPredefined: Bool, emoji: Text) : async Nat {
     let id = nextId;
     let item: GroceryItem = {
       id = id;
@@ -45,6 +48,7 @@ actor {
       category = category;
       completed = false;
       isPredefined = isPredefined;
+      emoji = emoji;
     };
     groceryItems.put(id, item);
     nextId += 1;
@@ -67,6 +71,7 @@ actor {
           category = item.category;
           completed = true;
           isPredefined = item.isPredefined;
+          emoji = item.emoji;
         };
         groceryItems.put(id, updatedItem);
         true

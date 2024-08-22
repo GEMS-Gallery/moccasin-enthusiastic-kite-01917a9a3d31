@@ -7,12 +7,13 @@ export interface GroceryItem {
   'isPredefined' : boolean,
   'name' : string,
   'completed' : boolean,
+  'emoji' : string,
   'category' : string,
 }
 export interface _SERVICE {
-  'addItem' : ActorMethod<[string, string, boolean], bigint>,
+  'addItem' : ActorMethod<[string, string, boolean, string], bigint>,
   'getItems' : ActorMethod<[], Array<GroceryItem>>,
-  'getPredefinedItems' : ActorMethod<[], Array<string>>,
+  'getPredefinedItems' : ActorMethod<[], Array<[string, string]>>,
   'markItemComplete' : ActorMethod<[bigint], boolean>,
   'removeItem' : ActorMethod<[bigint], boolean>,
 }

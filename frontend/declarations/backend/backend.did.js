@@ -4,12 +4,21 @@ export const idlFactory = ({ IDL }) => {
     'isPredefined' : IDL.Bool,
     'name' : IDL.Text,
     'completed' : IDL.Bool,
+    'emoji' : IDL.Text,
     'category' : IDL.Text,
   });
   return IDL.Service({
-    'addItem' : IDL.Func([IDL.Text, IDL.Text, IDL.Bool], [IDL.Nat], []),
+    'addItem' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Bool, IDL.Text],
+        [IDL.Nat],
+        [],
+      ),
     'getItems' : IDL.Func([], [IDL.Vec(GroceryItem)], ['query']),
-    'getPredefinedItems' : IDL.Func([], [IDL.Vec(IDL.Text)], ['query']),
+    'getPredefinedItems' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(IDL.Text, IDL.Text))],
+        ['query'],
+      ),
     'markItemComplete' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'removeItem' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   });
